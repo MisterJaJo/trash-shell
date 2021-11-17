@@ -73,8 +73,25 @@ int trash_cd(int argc, char **args) {
 	return 1;
 }
 
+const char *trash_ascii_art =
+    R"(
+ __/-\__    _                 _     
+|-------|  | |               | |    
+ |     |   | |_ _ __ __ _ ___| |__  
+ | | | |   | __| '__/ _` / __| '_ \ 
+ | | | |   | |_| | | (_| \__ \ | | |
+ |_____|    \__|_|  \__,_|___/_| |_|                            
+
+                   -                   
+       Trash Ridicules Any SHell               
+
+
+  ~ the best shell known to mankind ~  
+                                       
+)";
+
 int trash_help(int argc, char **args) {
-	printf("trash (Trash Ridicules Any SHell) - the best shell known to mankind\n");
+	printf("%s", trash_ascii_art);
 	return 1;
 }
 
