@@ -7,6 +7,7 @@
 #include <limits.h>
 
 #include "launch.h"
+#include "env.h"
 
 /*
   Function Declarations for builtin shell commands:
@@ -43,14 +44,7 @@ int trash_builtin_count() {
 */
 
 int chdir_home() {
-	char username[LOGIN_NAME_MAX];
-	getlogin_r(username, LOGIN_NAME_MAX);
-	
-	int username_len = strlen(username);
-
-	int home_path_len = (6 + username_len);
-	char *home_path = (char *) malloc(sizeof(char) * home_path_len);
-	sprintf(home_path, "/home/%s", username);
+	char *home_path = get_home_dir();
 	return chdir(home_path);
 }
 
@@ -60,35 +54,29 @@ int trash_cd(int argc, char **args) {
 			perror("trash");
 		}
 	} else {
-		if (strcmp(args[1], "~") == 0) {
-			if (chdir_home() != 0) {
-				perror("trash");
-			}
-		} else {
-			if (chdir(args[1]) != 0) {
-				perror("trash");
-			}
+		if (chdir(args[1]) != 0) {
+			perror("trash");
 		}
 	}
 	return 1;
 }
 
 const char *trash_ascii_art =
-    R"(
- __/-\__    _                 _     
-|-------|  | |               | |    
- |     |   | |_ _ __ __ _ ___| |__  
- | | | |   | __| '__/ _` / __| '_ \ 
- | | | |   | |_| | | (_| \__ \ | | |
- |_____|    \__|_|  \__,_|___/_| |_|                            
+"                                         \n\
+ __/-\\__    _                 _          \n\
+|-------|  | |               | |          \n\
+ |     |   | |_ _ __ __ _ ___| |_         \n\
+ | | | |   | __| '__/ _` / __| '_ \\      \n\
+ | | | |   | |_| | | (_| \\__ \\ | | |    \n\
+ |_____|    \\__|_|  \\__,_|___/_| |_|    \n\
+                                          \n\
+                   -                      \n\
+       Trash Ridicules Any SHell          \n\
+                                          \n\
+                                          \n\
+  ~ the best shell known to mankind ~     \n\
+                                          \n";
 
-                   -                   
-       Trash Ridicules Any SHell               
-
-
-  ~ the best shell known to mankind ~  
-                                       
-)";
 
 int trash_help(int argc, char **args) {
 	printf("%s", trash_ascii_art);
@@ -101,17 +89,34 @@ int trash_exit(int argc, char **args) {
 
 
 int trash_ls(int argc, char **args) {
-	printf("About to initialize buffer!");
-	char **ls_args_with_color_auto =
-		(char **) malloc((argc + 1) * sizeof(char *));
-
-	ls_args_with_color_auto[0] = args[0];
-	ls_args_with_color_auto[1] = "--color=auto";
-
-	for (int i = 1; i < argc; ++i) {
-		printf("Index %d -> arg: %s", i, args[i]);
-		ls_args_with_color_auto[i + 1] = args[i];
+	if (argc == 0 || args[0] == NULL) {
+		return -1;
 	}
 
-	return trash_launch(ls_args_with_color_auto);
+	char **ls_args_with_color_auto =
+		(char **) malloc((argc + 2) * sizeof(char *));
+
+	if (!ls_args_with_color_auto) {
+		fprintf(stderr, "trash: allocation error\n");
+		return -1;
+	}
+
+	int position = 0;
+
+	// Copy first argument (program name)
+	ls_args_with_color_auto[position++] = args[0];
+
+	// Insert --color=auto
+	ls_args_with_color_auto[position++] = "--color=auto";
+
+	// Copy arguments
+	for (int i = 1; i < argc; ++i) {
+		ls_args_with_color_auto[position++] = args[i];
+	}
+
+	// Insert null byte
+	ls_args_with_color_auto[position++] = 0;
+
+	return trash_launch(argc, ls_args_with_color_auto);
 }
+
