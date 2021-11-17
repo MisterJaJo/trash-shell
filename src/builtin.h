@@ -44,7 +44,8 @@ int trash_builtin_count() {
 */
 
 int chdir_home() {
-	char *home_path = get_home_dir();
+	int len;
+	char *home_path = trash_get_home_dir(&len);
 	return chdir(home_path);
 }
 
