@@ -25,20 +25,16 @@ char *trash_expand_home(char *arg) {
 	if (!arg)
 		return NULL;
 
+	if (arg[0] != '~' || (arg[1] && arg[1] != '/'))
+		return arg;
+		
 	int home_path_len;
 	char *home_path = trash_get_home_dir(&home_path_len);
 
-	// Count the number of ~ characters in the input string
-	int replace_count = 0;
 	int arg_len = strlen(arg);
-
-	for (int i = 0; i < arg_len; ++i) {
-		if (arg[i] == '~')
-			replace_count++;
-	}
-
+		
 	// Create the new buffer that will contain the expanded home paths
-	int expanded_len = arg_len - replace_count + replace_count * home_path_len;
+	int expanded_len = arg_len - 1 + home_path_len;
 	char *arg_new = (char *)malloc(sizeof(char) * expanded_len + 1);
 	if (!arg_new) {
 		fprintf(stderr, "trash: allocation error\n");
@@ -47,18 +43,16 @@ char *trash_expand_home(char *arg) {
 
 	// Expand ~
 	int position = 0;
-	for (int i = 0; i < arg_len; ++i) {
+
+	for (int j = 0; j < home_path_len; ++j) {
+		arg_new[position++] = home_path[j];
+	}
+
+	for (int i = 1; i < arg_len; ++i) {
 		if (!arg[i]) {
 			return NULL;
 		}
-
-		if (arg[i] == '~') {
-			for (int j = 0; j < home_path_len; ++j) {
-				arg_new[position++] = home_path[j];
-			}
-		} else {
-			arg_new[position++] = arg[i];
-		}
+		arg_new[position++] = arg[i];
 	}
 
 	// Insert \0 character afterwards
@@ -69,12 +63,10 @@ char *trash_expand_home(char *arg) {
 
 void trash_expand_envs(int argc, char **args) {
 	for (int i = 0; i < argc; ++i) {
-		// Replace all occurrences of ~ in args[i] with the home directory
+		// Replace ~ at the beginning of args[i] with the home directory
 		if ((args[i] = trash_expand_home(args[i])) == NULL) {
-			fprintf(stderr, "failed to expand home in input\n");
+			fprintf(stderr, "failed to expand home specifier (~) in input\n");
 			return;
-		} else {
-			printf("Expanded args[%d] -> %s\n", i, args[i]);
 		}
 
 		// Expand environment variables
@@ -84,9 +76,9 @@ void trash_expand_envs(int argc, char **args) {
 
 			strcpy(env, args[i] + 1);
 
-			char *ppath = getenv(env);
-			if (ppath != NULL) {
-				args[i] = ppath;
+			char *env_val = getenv(env);
+			if (env_val != NULL) {
+				args[i] = env_val;
 			}
 
 			free(env);
