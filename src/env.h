@@ -101,7 +101,6 @@ char *trash_expand_env_vars(char *arg) {
 	}
 
 	free(env);
-	printf("Arg: %s\n", arg);
 
 	return arg;
 }
