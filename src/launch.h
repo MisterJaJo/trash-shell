@@ -11,7 +11,7 @@
 /*
   Main shell functionality.
  */
-int trash_launch(int argc, char **args) {
+int trash_launch(int argc, char **args) { 
 	pid_t pid;
 	int status;
 

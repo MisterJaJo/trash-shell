@@ -46,7 +46,9 @@ int trash_builtin_count() {
 int chdir_home() {
 	int len;
 	char *home_path = trash_get_home_dir(&len);
-	return chdir(home_path);
+	int exit_code = chdir(home_path);
+	free(home_path);
+	return exit_code;
 }
 
 int trash_cd(int argc, char **args) {
@@ -118,6 +120,8 @@ int trash_ls(int argc, char **args) {
 	// Insert null byte
 	ls_args_with_color_auto[position++] = 0;
 
-	return trash_launch(argc, ls_args_with_color_auto);
+	int launch_exit_code = trash_launch(argc, ls_args_with_color_auto);
+	free(ls_args_with_color_auto);
+	return launch_exit_code;
 }
 

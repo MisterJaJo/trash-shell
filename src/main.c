@@ -23,14 +23,18 @@ int main(int argc, char **argv) {
 		line = trash_read_line();
 
 		int trash_argc = 0;
-		args = trash_split_line(&trash_argc, line);
+		args = trash_split_line(line, &trash_argc);
+		free(line);
 		
 		trash_expand_envs(trash_argc, args);
 		
 		status = trash_execute(trash_argc, args);
 		printf("\n");
 
-		free(line);
+		// Free the allocated tokens.
+		for (int i = 0; i < trash_argc; ++i) {
+			free(args[i]);
+		}
 		free(args);
 	} while (status);
 

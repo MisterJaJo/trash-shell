@@ -26,7 +26,7 @@ void trash_print_prompt(void) {
 	}
 
 	int username_len = strlen(username);
-	char *home_path = (char *) malloc(sizeof(char) * (username_len + 6));
+	char *home_path = (char *) malloc(sizeof(char) * (username_len + 6 + 1));
 	sprintf(home_path, "/home/%s", username);
 
 	if (strcmp(home_path, path) == 0) {
